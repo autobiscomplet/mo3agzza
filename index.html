@@ -1,0 +1,1238 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>أتوبيس كومبليت — لعب أونلاين</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111827; --muted:#9ca3af; --text:#e5e7eb; --accent:#06b6d4; --accent2:#22c55e; --danger:#ef4444; --warn:#f59e0b;
+      --border:#1f2937;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto,Arial; background:linear-gradient(120deg,#111827,#0b132b);
+      color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+    }
+    .container{width:100%; max-width:1050px}
+    .card{
+      background:linear-gradient(180deg,#0b1020,#0b1220); border:1px solid var(--border);
+      border-radius:16px; padding:20px; box-shadow:0 10px 40px rgba(0,0,0,.4);
+      width:100%;
+    }
+    header{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex-wrap:wrap}
+    h1{margin:0; font-weight:800; letter-spacing:.5px}
+    h2{margin:.4rem 0 1rem 0}
+    .muted{color:var(--muted)}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .grid{display:grid; gap:10px}
+    .grid-letters{grid-template-columns:repeat(14,1fr)}
+    .btn{
+      background:#0a1728; color:#eaf2ff; border:1px solid #1e293b; padding:10px 16px; border-radius:10px; cursor:pointer;
+      transition:.2s; font-weight:700; box-shadow: inset 0 0 0 0 rgba(255,255,255,.05);
+      font-size:14px;
+    }
+    .btn:hover{transform:translateY(-1px); border-color:#334155}
+    .btn.accent{background:linear-gradient(90deg,#0284c7,#06b6d4); border:none}
+    .btn.green{background:linear-gradient(90deg,#16a34a,#22c55e); border:none}
+    .btn.warn{background:linear-gradient(90deg,#d97706,#f59e0b); border:none}
+    .btn.danger{background:linear-gradient(90deg,#b91c1c,#ef4444); border:none}
+    .btn.outline{background:transparent; border:1px dashed #334155; color:#cbd5e1}
+    .pill{padding:6px 10px; border-radius:999px; background:#0b1a2a; border:1px solid #1e293b; font-weight:700}
+    .pill.good{background:#0a2016; border-color:#14532d; color:#bbf7d0}
+    .pill.bad{background:#2a0b0b; border-color:#7f1d1d; color:#fecaca}
+    input, select{
+      width:100%; background:#0b1626; border:1px solid #1f2937; border-radius:10px; padding:12px 14px; color:#e5e7eb;
+      outline:none; transition:.2s; font-size:14px;
+    }
+    input:focus, select:focus{border-color:#334155; box-shadow:0 0 0 4px rgba(2,132,199,.1)}
+    label{display:block; font-weight:700; margin:6px 2px}
+    .hidden{display:none !important}
+    .section{margin:10px 0 0}
+    .list{display:flex; flex-wrap:wrap; gap:8px}
+    .player{
+      padding:8px 10px; border:1px solid #1f2937; border-radius:10px; background:#0b1525; display:flex; gap:8px; align-items:center
+    }
+    .player .dot{width:10px; height:10px; border-radius:50%}
+    .dot.on{background:#22c55e} .dot.off{background:#ef4444}
+    .code{
+      font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      padding:10px 14px; border-radius:10px; background:#0a1220; border:1px dashed #334155; font-size:18px; letter-spacing:2px;
+      color:#93c5fd
+    }
+    .letter{
+      padding:10px; text-align:center; border:1px solid #243143; border-radius:10px; cursor:pointer; user-select:none; font-weight:800;
+      background:#0b1525; transition:.15s;
+    }
+    .letter:hover{background:#0f1b2f}
+    .letter.selected{outline:3px solid #06b6d487; background:#0a2233}
+    .letter.used{opacity:.35; pointer-events:none; text-decoration:line-through}
+    .answers{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+    .answer-item{background:#0b1525; border:1px solid #1f2937; border-radius:10px; padding:10px}
+    .scoreboard{display:grid; grid-template-columns:1.5fr .5fr; gap:8px; align-items:center}
+    .score-row{
+      display:flex; justify-content:space-between; padding:10px 12px; border:1px solid #243143; border-radius:10px; background:#0b1525;
+    }
+    .rank{width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; margin-inline-end:8px}
+    .rank.gold{background:#fbbf24; color:#1f2937} .rank.silver{background:#cbd5e1; color:#111827} .rank.bronze{background:#fdba74; color:#1f2937}
+    .hint{font-size:13px; color:#9ca3af}
+    .divider{height:1px; background:#1f2937; margin:10px 0}
+    footer.small{margin-top:10px; font-size:13px; color:#9ca3af}
+    @media (max-width: 900px){
+      .grid-letters{grid-template-columns:repeat(8,1fr)}
+      .answers{grid-template-columns:1fr}
+    }
+    @media (max-width: 520px){
+      body{padding:12px}
+      .card{padding:14px}
+      .grid-letters{grid-template-columns:repeat(6,1fr)}
+      .btn{padding:10px 12px; font-size:13.5px}
+      .code{font-size:16px}
+      header{gap:6px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <header>
+        <h1>🚌 أتوبيس كومبليت</h1>
+        <div id="headerRight" class="row"></div>
+      </header>
+
+      <!-- إدارة اللاعبين (هوست) -->
+      <section id="manageBar" class="section hidden">
+        <div class="muted">إدارة اللاعبين (إزالة أثناء الجيم)</div>
+        <div id="manageList" class="list" style="margin-top:6px"></div>
+        <div class="divider"></div>
+      </section>
+
+      <!-- View: ادخال الاسم -->
+      <section id="view-auth" class="section">
+        <h2>سجّل اسمك</h2>
+        <div class="row">
+          <div style="flex:1; min-width:240px">
+            <label>اسمك داخل اللعبة</label>
+            <input id="nameInput" placeholder="اكتب اسمك هنا" maxlength="20" />
+          </div>
+          <div>
+            <button id="saveNameBtn" class="btn accent">ادخل</button>
+          </div>
+        </div>
+        <footer class="small">لو دخلت من رابط روم، هنضمّك تلقائيًا بعد كتابة الاسم.</footer>
+      </section>
+
+      <!-- View: الرئيسية -->
+      <section id="view-home" class="section hidden">
+        <h2>ابدأ اللعب</h2>
+        <div class="row">
+          <button id="createBtn" class="btn green">إنشاء جيم (هوست)</button>
+          <button id="joinBtn" class="btn">انضمام لروم</button>
+        </div>
+      </section>
+
+      <!-- View: انضمام -->
+      <section id="view-join" class="section hidden">
+        <h2>انضمام لروم</h2>
+        <div class="row">
+          <div style="flex:1; min-width:240px">
+            <label>كود الروم</label>
+            <input id="joinCodeInput" placeholder="مثال: 7K3HD" maxlength="8" />
+          </div>
+          <div>
+            <button id="doJoinBtn" class="btn accent">انضم</button>
+          </div>
+          <div>
+            <button id="backHome1" class="btn outline">رجوع</button>
+          </div>
+        </div>
+        <div id="joinMsg" class="hint" style="margin-top:8px"></div>
+      </section>
+
+      <!-- View: لوبي -->
+      <section id="view-lobby" class="section hidden">
+        <h2>لوبي الجيم</h2>
+        <div class="row" style="align-items:center">
+          <div>كود الروم:</div>
+          <div id="roomCode" class="code">—</div>
+          <button id="copyCodeBtn" class="btn">نسخ الكود</button>
+          <button id="copyLinkBtn" class="btn">نسخ رابط الانضمام</button>
+        </div>
+        <div class="divider"></div>
+        <div class="row">
+          <div style="flex:2">
+            <div class="muted">اللاعبين:</div>
+            <div id="playersList" class="list" style="margin-top:6px"></div>
+          </div>
+          <div style="flex:1; min-width:240px">
+            <div class="muted">إعدادات الهوست:</div>
+
+            <div class="row" style="margin-top:6px">
+              <div style="flex:1">
+                <label>عدد الجولات</label>
+                <select id="roundsSelect">
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5" selected>5</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:6px">
+              <div style="flex:1">
+                <label>اسم الروم</label>
+                <input id="roomNameInput" placeholder="مثال: شلة الجمعة" maxlength="30" />
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:6px">
+              <div style="flex:1">
+                <label>شروط الإيقاف</label>
+                <div class="row">
+                  <button id="tgFull"  class="btn outline" data-key="requireFullAnswers" data-label="ملء كل الخانات">ملء كل الخانات: OFF</button>
+                  <button id="tgFirst" class="btn outline" data-key="requireFirstLetter" data-label="أول حرف = حرف الجولة">أول حرف = حرف الجولة: OFF</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:8px">
+              <button id="startGameBtn" class="btn green">ابدأ اللعب</button>
+            </div>
+            <div id="lobbyHint" class="hint" style="margin-top:6px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: اختيار الحرف -->
+      <section id="view-letter" class="section hidden">
+        <div class="row" style="justify-content:space-between">
+          <h2>اختر حرف الجولة <span id="roundTag" class="pill"></span></h2>
+          <div>
+            <span class="pill">حروف مستخدمة: <span id="usedLettersCount">0</span></span>
+          </div>
+        </div>
+        <div class="hint">كل لاعب يختار حرف، والهوست يقدر يبدأ الجولة فورًا حتى لو محدش صوّت.</div>
+        <div id="lettersGrid" class="grid grid-letters" style="margin-top:10px"></div>
+        <div class="row" style="margin-top:10px; justify-content:space-between">
+          <div class="hint">تصويتاتك: <span id="myVote" class="pill"></span></div>
+          <div class="row">
+            <span class="pill" id="votesCount">0 تصويت</span>
+            <button id="forceStartBtn" class="btn warn">ابدأ الجولة الآن</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- View: الجولة -->
+      <section id="view-round" class="section hidden">
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <h2>الجولة <span id="roundNumTag" class="pill"></span> — الحرف: <span id="currentLetter" class="pill good"></span></h2>
+          <div class="row">
+            <span id="stopInfo" class="pill bad hidden"></span>
+            <button id="completeBtn" class="btn danger" title="تحقّق من شروط الإيقاف">🚌 أتوبيس كومبليت</button>
+          </div>
+        </div>
+        <div class="answers" id="answersGrid"></div>
+        <div class="hint" style="margin-top:8px">
+          أول واحد يضغط "أتوبيس كومبليت" يقفل الكتابة للجميع، وبعدها الهوست بيراجع الإجابات ويعتمد النتيجة.
+        </div>
+      </section>
+
+      <!-- View: مراجعة الهوست (خانة بخانة) -->
+      <section id="view-review" class="section hidden">
+        <h2>
+          مراجعة الجولة <span id="revRoundTag" class="pill"></span>
+          — الحرف: <span id="revLetterTag" class="pill"></span>
+          — الفئة: <span id="revCatTag" class="pill"></span>
+        </h2>
+        <div class="hint">راجع خانة واحدة لكل اللاعبين، وحدّد: احتسب (10) / مكرر (5) / صفر (0). ثم التالي للفئة التالية.</div>
+        <div id="reviewContainer" class="section"></div>
+        <div class="row" style="margin-top:10px">
+          <button id="prevCatBtn" class="btn outline hidden">السابق</button>
+          <button id="nextCatBtn" class="btn accent hidden">التالي</button>
+          <button id="finalizeReviewBtn" class="btn green hidden">اعتماد النتائج</button>
+        </div>
+      </section>
+
+      <!-- View: نتائج الجولة -->
+      <section id="view-scoring" class="section hidden">
+        <h2>نتائج الجولة <span id="scRoundTag" class="pill"></span> — الحرف: <span id="scLetterTag" class="pill"></span></h2>
+        <div class="hint">أول واحد وقف الجولة: <b id="stoppedByName">—</b></div>
+        <div class="divider"></div>
+        <div>
+          <h3>الترتيب الحالي</h3>
+          <div id="scoreboard" class="section"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="nextRoundBtn" class="btn accent hidden">الجولة التالية</button>
+          <button id="finishGameBtn" class="btn green">إنهاء اللعبة</button>
+          <button id="backToLobbyBtn2" class="btn outline">العودة لصفحة الجيم</button>
+        </div>
+      </section>
+
+      <!-- View: نهاية اللعبة -->
+      <section id="view-end" class="section hidden">
+        <h2>انتهت اللعبة 🎉</h2>
+        <div>
+          <h3>الترتيب النهائي</h3>
+          <div id="finalScoreboard" class="section"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="startNewGameBtn" class="btn green hidden">ابدء جيم جديد</button>
+          <button id="backToLobbyBtn" class="btn outline">العودة لصفحة الجيم</button>
+        </div>
+      </section>
+
+      <footer class="small">
+        ملاحظات: السكربت يعتمد على Firebase Realtime Database. للاستعمال التعليمي/التجريبي.
+      </footer>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script>
+    // إعداد Firebase — إعداداتك
+    const firebaseConfig = {
+      apiKey: "AIzaSyDroWLuD4k7RnrZeDTVYtdbfjdk44r8_bM",
+      authDomain: "delivery-system-afdaa.firebaseapp.com",
+      databaseURL: "https://delivery-system-afdaa-default-rtdb.firebaseio.com",
+      projectId: "delivery-system-afdaa",
+      storageBucket: "delivery-system-afdaa.firebasestorage.app",
+      messagingSenderId: "761159281767",
+      appId: "1:761159281767:web:a79aa95310f72bb65778c2",
+      measurementId: "G-J3XHPF9DSV"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ثوابت ومساعدات
+    const ARABIC_LETTERS = ['ا','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','ه','و','ي'];
+    const DEFAULT_CATEGORIES = ['اسم','بلد','حيوان','جماد','نبات','مهنة'];
+    const BASE_TITLE = 'أتوبيس كومبليت — لعب أونلاين';
+
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => document.querySelectorAll(sel);
+    const state = {
+      userId: null,
+      name: null,
+      roomCode: null,
+      isHost: false,
+      room: null,
+      myVote: null,
+      unsub: null,
+      pendingCode: null // كود دعوة من الرابط
+    };
+
+    function randId(len=16){
+      const arr = new Uint8Array(len);
+      crypto.getRandomValues(arr);
+      return Array.from(arr, v => "abcdefghijklmnopqrstuvwxyz0123456789"[v % 36]).join('');
+    }
+    function makeRoomCode(len=5){
+      const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      return Array.from({length:len}, () => alphabet[Math.floor(Math.random()*alphabet.length)]).join('');
+    }
+    function copyText(t){ navigator.clipboard?.writeText(t).then(()=>{},()=>{}); }
+    function getJoinLink(code = state.roomCode){
+      const base = location.origin + location.pathname; // يدعم GitHub Pages
+      return `${base}?r=${encodeURIComponent(code||'')}`;
+    }
+    function show(id){
+      ['auth','home','join','lobby','letter','round','review','scoring','end'].forEach(v => {
+        const el = $('#view-'+v);
+        if(el) el.classList.add('hidden');
+      });
+      const el = $('#view-'+id);
+      if(el) el.classList.remove('hidden');
+    }
+    function setHeader(){
+      const right = $('#headerRight');
+      right.innerHTML = '';
+      if(state.name){
+        const namePill = document.createElement('div');
+        namePill.className = 'pill';
+        namePill.textContent = '👤 ' + state.name;
+        right.appendChild(namePill);
+      }
+      if(state.roomCode){
+        const code = document.createElement('div');
+        code.className = 'pill';
+        code.textContent = 'روم: ' + state.roomCode;
+        right.appendChild(code);
+      }
+      const roomName = state.room?.settings?.roomName || '';
+      if(roomName){
+        const nm = document.createElement('div');
+        nm.className = 'pill';
+        nm.textContent = '🏷️ ' + roomName;
+        right.appendChild(nm);
+        document.title = `${BASE_TITLE} | ${roomName}`;
+      }else{
+        document.title = BASE_TITLE;
+      }
+      if(state.isHost){
+        const host = document.createElement('div');
+        host.className = 'pill good';
+        host.textContent = 'هوست';
+        right.appendChild(host);
+
+        const manageBtn = document.createElement('button');
+        manageBtn.className = 'btn outline';
+        manageBtn.textContent = 'إدارة اللاعبين';
+        manageBtn.addEventListener('click', toggleManageBar);
+        right.appendChild(manageBtn);
+      }
+      const renameBtn = document.createElement('button');
+      renameBtn.className = 'btn outline';
+      renameBtn.textContent = 'إعادة تسمية';
+      renameBtn.addEventListener('click', renameSelf);
+      right.appendChild(renameBtn);
+
+      if(state.roomCode){
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'btn outline';
+        logoutBtn.textContent = 'تسجيل خروج';
+        logoutBtn.addEventListener('click', leaveRoom);
+        right.appendChild(logoutBtn);
+      }
+    }
+    function normalizeArabic(s=''){
+      let x = (''+s).trim();
+      x = x.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g,'').replace(/ـ/g,'');
+      x = x.replace(/[أإآٱ]/g,'ا').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ى/g,'ي');
+      return x;
+    }
+    function typedStartsWithLetter(word, letter){
+      const L = normalizeArabic(letter||'').charAt(0);
+      if(!L) return false;
+      let w = normalizeArabic(word||'');
+      if(!w) return false;
+      return w.charAt(0) === L;
+    }
+    function rankCls(i){ return i===0?'gold':i===1?'silver':i===2?'bronze':'' }
+
+    // عناصر
+    const nameInput = $('#nameInput');
+    const roomNameInput = $('#roomNameInput');
+    const roundsSelect = $('#roundsSelect');
+    const tgFull = $('#tgFull');
+    const tgFirst = $('#tgFirst');
+
+    // أحداث عامة
+    $('#createBtn').addEventListener('click', createRoom);
+    $('#joinBtn').addEventListener('click', ()=> { show('join'); $('#joinMsg').textContent = ''; });
+    $('#backHome1').addEventListener('click', ()=> show('home'));
+    $('#doJoinBtn').addEventListener('click', doJoin);
+    $('#copyCodeBtn').addEventListener('click', ()=> state.roomCode && copyText(state.roomCode));
+    $('#copyLinkBtn').addEventListener('click', ()=> state.roomCode && (copyText(getJoinLink()), $('#lobbyHint').textContent='تم نسخ رابط الانضمام.'));
+    $('#startGameBtn').addEventListener('click', startGame);
+    $('#forceStartBtn').addEventListener('click', hostFinalizeLetter);
+    $('#completeBtn').addEventListener('click', stopRound);
+    $('#nextRoundBtn').addEventListener('click', nextRound);
+    $('#finalizeReviewBtn').addEventListener('click', finalizeReview);
+    $('#prevCatBtn').addEventListener('click', ()=> changeReviewCat(-1));
+    $('#nextCatBtn').addEventListener('click', ()=> changeReviewCat(1));
+    $('#backToLobbyBtn').addEventListener('click', backToLobby);
+    $('#startNewGameBtn').addEventListener('click', startNewGame);
+    $('#finishGameBtn').addEventListener('click', finishGame);
+    $('#backToLobbyBtn2').addEventListener('click', backToLobby);
+
+    // حفظ الاسم + دعم الدعوة بالرابط
+    $('#saveNameBtn').addEventListener('click', async ()=>{
+      const name = nameInput.value.trim();
+      if(!name){ nameInput.focus(); return; }
+      state.name = name; localStorage.setItem('name', name);
+      if(state.pendingCode){
+        await joinByCode(state.pendingCode, msg => $('#joinMsg').textContent = msg||'');
+        state.pendingCode = null;
+      }else{
+        show('home'); setHeader();
+      }
+    });
+
+    // سويتش الإعدادات: واجهة + تمكين + حفظ
+    function applyToggleUI(btn, isOn){
+      const label = btn.dataset.label || 'الإعداد';
+      btn.dataset.on = isOn ? '1' : '0';
+      btn.textContent = `${label}: ${isOn ? 'ON' : 'OFF'}`;
+      btn.classList.toggle('green', isOn);
+      btn.classList.toggle('outline', !isOn);
+    }
+    function setToggleEnabled(btn, enabled){
+      btn.disabled = !enabled;
+      btn.style.opacity = enabled ? '1' : '.6';
+      btn.style.pointerEvents = enabled ? 'auto' : 'none';
+    }
+    async function saveToggle(btn){
+      if(!state.isHost || !state.roomCode || state.room?.status!=='lobby') return;
+      const key = btn.dataset.key; // requireFullAnswers | requireFirstLetter
+      const next = btn.dataset.on !== '1';
+      applyToggleUI(btn, next); // حدث الواجهة مباشرة
+      await db.ref(`rooms/${state.roomCode}/settings/${key}`).set(next);
+    }
+    tgFull.addEventListener('click', ()=> saveToggle(tgFull));
+    tgFirst.addEventListener('click', ()=> saveToggle(tgFirst));
+
+    // تهيئة
+    (function init(){
+      let uid = localStorage.getItem('uid');
+      if(!uid){ uid = randId(12); localStorage.setItem('uid', uid); }
+      state.userId = uid;
+
+      // قراءة كود الدعوة من الرابط
+      const url = new URL(location.href);
+      const invite = (url.searchParams.get('r') || url.searchParams.get('room') || '').trim().toUpperCase();
+      if(invite) state.pendingCode = invite;
+
+      const name = localStorage.getItem('name') || '';
+      if(name){
+        state.name = name; nameInput.value = name;
+        if(state.pendingCode){
+          joinByCode(state.pendingCode, (m)=>{}).catch(()=> show('home'));
+          state.pendingCode = null;
+        }else{
+          show('home');
+        }
+      }else{
+        show('auth');
+      }
+      setHeader();
+      renderLettersGrid();
+      renderAnswerInputs();
+    })();
+
+    function requireName(){
+      if(!state.name){ show('auth'); return false; }
+      return true;
+    }
+
+    // إنشاء روم
+    async function createRoom(){
+      if(!requireName()) return;
+      const code = makeRoomCode(5);
+      const ref = db.ref('rooms/'+code);
+      const snap = await ref.get();
+      if(snap.exists()){ return createRoom(); }
+      const now = firebase.database.ServerValue.TIMESTAMP;
+      const room = {
+        hostId: state.userId,
+        status: 'lobby',
+        rounds: 5,
+        currentRound: 0,
+        createdAt: now,
+        usedLetters: {},
+        categories: DEFAULT_CATEGORIES,
+        letter: null,
+        settings: {
+          roomName: '',
+          requireFullAnswers: true,
+          requireFirstLetter: true
+        }
+      };
+      await ref.set(room);
+      state.roomCode = code;
+      await joinAsPlayer(code, true);
+      subscribeRoom();
+      show('lobby');
+      setHeader();
+      $('#roomCode').textContent = code;
+      $('#lobbyHint').textContent = 'انسخ الكود أو رابط الانضمام وابعته لصحابك.';
+    }
+
+    // انضمام (يسمح أثناء الجيم)
+    async function doJoin(){
+      if(!requireName()) return;
+      const code = ($('#joinCodeInput').value||'').trim().toUpperCase();
+      if(!code){ $('#joinMsg').textContent = 'اكتب كود الروم.'; return; }
+      await joinByCode(code, msg => $('#joinMsg').textContent = msg||'');
+    }
+
+    async function joinByCode(code, setError){
+      try{
+        const ref = db.ref('rooms/'+code);
+        const snap = await ref.get();
+        if(!snap.exists()){ setError?.('الروم غير موجود.'); return; }
+        const room = snap.val();
+        state.roomCode = code;
+        await joinAsPlayer(code, (room.hostId===state.userId));
+        subscribeRoom();
+        setHeader();
+        $('#roomCode').textContent = code;
+        $('#lobbyHint').textContent = '';
+      }catch(e){
+        setError?.('تعذّر الانضمام، حاول ثانية.');
+      }
+    }
+
+    async function joinAsPlayer(code, asHost){
+      const pRef = db.ref(`rooms/${code}/players/${state.userId}`);
+      const now = firebase.database.ServerValue.TIMESTAMP;
+      await pRef.update({
+        name: state.name,
+        score: 0,
+        online: true,
+        joinedAt: now
+      });
+      pRef.onDisconnect().update({ online:false });
+      state.isHost = asHost;
+    }
+
+    // الاشتراك
+    function subscribeRoom(){
+      if(state.unsub) state.unsub();
+      const ref = db.ref('rooms/'+state.roomCode);
+      const handler = ref.on('value', snap => {
+        const room = snap.val();
+        if(!room){
+          alert('الروم اتقفل أو اتحذف.');
+          state.roomCode = null; state.isHost = false; state.room = null;
+          setHeader(); show('home'); return;
+        }
+        // kick check
+        if(room.kicks && room.kicks[state.userId] && room.hostId !== state.userId){
+          alert('تمت إزالتك من الروم بواسطة الهوست');
+          if(state.unsub) state.unsub();
+          state.roomCode = null; state.isHost = false; state.room = null;
+          setHeader(); show('home'); return;
+        }
+
+        state.room = room;
+        state.isHost = (room.hostId === state.userId);
+        setHeader();
+
+        if(!$('#manageBar').classList.contains('hidden')) renderManageList();
+
+        if(room.status === 'lobby'){
+          show('lobby');
+          $('#roomCode').textContent = state.roomCode;
+          const players = Object.entries(room.players||{}).map(([id,p])=>({id,...p}));
+          renderPlayers(players);
+
+          roundsSelect.value = String(room.rounds||5);
+          $('#startGameBtn').style.display = state.isHost ? 'inline-block' : 'none';
+
+          const s = room.settings || {};
+          const fullOn  = (s.requireFullAnswers === undefined) ? true : !!s.requireFullAnswers;
+          const firstOn = (s.requireFirstLetter === undefined) ? true : !!s.requireFirstLetter;
+          roomNameInput.value = s.roomName || '';
+          applyToggleUI(tgFull, fullOn);
+          applyToggleUI(tgFirst, firstOn);
+
+          roomNameInput.disabled = !state.isHost;
+          setToggleEnabled(tgFull,  state.isHost);
+          setToggleEnabled(tgFirst, state.isHost);
+        }
+        else if(room.status === 'choose-letter'){
+          show('letter');
+          updateLetterView();
+        }
+        else if(room.status === 'in-round'){
+          show('round');
+          updateRoundView();
+          if(room.stop && state.isHost){
+            const rKey = 'r'+room.currentRound;
+            const hasReview = room.reviews && room.reviews[rKey];
+            if(!hasReview){
+              prepareReview().catch(e=>console.error(e));
+            }
+          }
+        }
+        else if(room.status === 'review'){
+          show('review');
+          updateReviewView();
+        }
+        else if(room.status === 'scoring'){
+          show('scoring');
+          updateScoringView();
+        }
+        else if(room.status === 'ended'){
+          show('end');
+          updateEndView();
+        }
+      });
+      state.unsub = () => ref.off('value', handler);
+    }
+
+    function renderPlayers(players){
+      const box = $('#playersList');
+      box.innerHTML = '';
+      players.sort((a,b)=> (b.online - a.online) || ((a.joinedAt||0)-(b.joinedAt||0)));
+      players.forEach((p)=>{
+        const el = document.createElement('div');
+        el.className = 'player';
+        el.innerHTML = `
+          <div class="dot ${p.online?'on':'off'}"></div>
+          <div style="font-weight:800">${p.name||'—'}</div>
+          <div class="pill" title="النقاط">${p.score||0} نقطة</div>
+          ${p.id === (state.room?.hostId) ? '<div class="pill good">هوست</div>' : ''}
+          ${state.isHost && p.id !== (state.room?.hostId) ? '<button class="btn danger kick" style="padding:6px 8px; font-size:12px">إزالة</button>' : ''}
+        `;
+        if(state.isHost && p.id !== (state.room?.hostId)){
+          el.querySelector('.kick').addEventListener('click', ()=> removePlayer(p.id, p.name));
+        }
+        box.appendChild(el);
+      });
+    }
+
+    function toggleManageBar(){
+      const bar = $('#manageBar');
+      bar.classList.toggle('hidden');
+      if(!bar.classList.contains('hidden')) renderManageList();
+    }
+    function renderManageList(){
+      const box = $('#manageList');
+      const players = state.room?.players || {};
+      box.innerHTML = '';
+      Object.entries(players).forEach(([uid,p])=>{
+        const el = document.createElement('div');
+        el.className = 'player';
+        el.innerHTML = `
+          <div class="dot ${p.online?'on':'off'}"></div>
+          <div style="font-weight:800">${p.name||'—'}</div>
+          ${uid === (state.room?.hostId) ? '<div class="pill good">هوست</div>' :
+            (state.isHost ? '<button class="btn danger kick" style="padding:6px 8px; font-size:12px">إزالة</button>' : '')}
+        `;
+        if(state.isHost && uid !== (state.room?.hostId)){
+          el.querySelector('.kick').addEventListener('click', ()=> removePlayer(uid, p.name));
+        }
+        box.appendChild(el);
+      });
+    }
+
+    // إعدادات اللوبي: اسم الروم والجولات
+    roomNameInput.addEventListener('input', throttle(async ()=>{
+      if(!state.isHost || !state.roomCode || state.room?.status!=='lobby') return;
+      await db.ref('rooms/'+state.roomCode+'/settings/roomName').set(roomNameInput.value.trim());
+      setHeader();
+    }, 300));
+    roundsSelect.addEventListener('change', async ()=>{
+      if(!state.isHost || !state.roomCode) return;
+      await db.ref('rooms/'+state.roomCode+'/rounds').set(parseInt(roundsSelect.value,10));
+    });
+
+    // بدء اللعب
+    async function startGame(){
+      if(!state.isHost) return;
+      const ref = db.ref('rooms/'+state.roomCode);
+      await ref.update({
+        currentRound: 0,
+        usedLetters: {},
+        letter: null,
+        letterVotes: null,
+        submissions: null,
+        reviews: null,
+        reviewState: null,
+        roundResults: null,
+        stop: null,
+        status: 'choose-letter'
+      });
+    }
+
+    // اختيار الحرف
+    function renderLettersGrid(){
+      const grid = $('#lettersGrid');
+      grid.innerHTML = '';
+      ARABIC_LETTERS.forEach(L=>{
+        const div = document.createElement('div');
+        div.className = 'letter';
+        div.textContent = L;
+        div.addEventListener('click', ()=> voteLetter(L));
+        grid.appendChild(div);
+      });
+    }
+    function updateLetterView(){
+      const room = state.room;
+      const used = room.usedLetters || {};
+      const votes = room.letterVotes || {};
+      $('#roundTag').textContent = `${(room.currentRound||0)+1}/${room.rounds||'—'}`;
+      $('#usedLettersCount').textContent = Object.keys(used).length;
+      $$('.letter').forEach(el=>{
+        const L = el.textContent;
+        el.classList.toggle('used', !!used[L]);
+        el.classList.toggle('selected', state.myVote === L);
+        el.style.pointerEvents = used[L] ? 'none' : 'auto';
+      });
+      const totalPlayers = Object.keys(room.players||{}).length;
+      const votesCount = Object.keys(votes).length;
+      $('#votesCount').textContent = `${votesCount} / ${totalPlayers} تصويت`;
+      $('#forceStartBtn').classList.toggle('hidden', !state.isHost);
+      const my = votes[state.userId] || state.myVote || '';
+      state.myVote = my;
+      $('#myVote').textContent = my || '—';
+    }
+    async function voteLetter(L){
+      const room = state.room;
+      if(!room || room.status !== 'choose-letter') return;
+      if(room.usedLetters && room.usedLetters[L]) return;
+      state.myVote = L;
+      $('#myVote').textContent = L;
+      await db.ref(`rooms/${state.roomCode}/letterVotes/${state.userId}`).set(L);
+      updateLetterView();
+    }
+    async function hostFinalizeLetter(){
+      if(!state.isHost) return;
+      const room = state.room;
+      if(!room || room.status!=='choose-letter') return;
+      const votes = room.letterVotes || {};
+      const counts = {};
+      for(const uid in votes){
+        const L = votes[uid];
+        if(room.usedLetters && room.usedLetters[L]) continue;
+        counts[L] = (counts[L]||0)+1;
+      }
+      let best = null, bestC = -1;
+      for(const L in counts){
+        if(counts[L]>bestC){ best=L; bestC=counts[L]; }
+        else if(counts[L]===bestC && Math.random()<.5){ best=L; }
+      }
+      if(!best){
+        const hostVote = state.myVote;
+        if(hostVote && !(room.usedLetters && room.usedLetters[hostVote])) best = hostVote;
+      }
+      if(!best){
+        const avail = ARABIC_LETTERS.filter(L => !(room.usedLetters && room.usedLetters[L]));
+        best = avail[Math.floor(Math.random()*avail.length)];
+      }
+      await db.ref('rooms/'+state.roomCode).update({
+        letter: best,
+        [`usedLetters/${best}`]: true,
+        status: 'in-round',
+        stop: null,
+        currentRound: (room.currentRound||0)+1
+      });
+    }
+
+    // الجولة
+    function renderAnswerInputs(){
+      const grid = $('#answersGrid');
+      grid.innerHTML = '';
+      DEFAULT_CATEGORIES.forEach(cat=>{
+        const div = document.createElement('div');
+        div.className = 'answer-item';
+        div.innerHTML = `
+          <label>${cat}</label>
+          <input data-cat="${cat}" placeholder="اكتب كلمة تبدأ بحرف الجولة" />
+        `;
+        grid.appendChild(div);
+      });
+      grid.querySelectorAll('input').forEach(inp=>{
+        inp.addEventListener('input', throttle(async ()=>{
+          await saveMyAnswers();
+          updateCompleteButtonState();
+        }, 200));
+      });
+    }
+    function updateRoundView(){
+      const room = state.room;
+      $('#roundNumTag').textContent = `${room.currentRound}/${room.rounds}`;
+      $('#currentLetter').textContent = room.letter || '—';
+      const stopped = !!room.stop;
+      $('#completeBtn').disabled = stopped;
+      $('#stopInfo').classList.toggle('hidden', !stopped);
+      $('#stopInfo').textContent = stopped ? `تم الإيقاف` : '';
+      const myAns = ((room.submissions||{})['r'+room.currentRound]||{})[state.userId] || {};
+      $('#answersGrid').querySelectorAll('input').forEach(inp=>{
+        const cat = inp.dataset.cat;
+        const val = myAns[cat] || '';
+        if(inp.value !== val) inp.value = val;
+        inp.disabled = stopped;
+      });
+      updateCompleteButtonState();
+    }
+
+    function throttle(fn, wait){
+      let t, lastArgs;
+      return function(...args){
+        lastArgs = args;
+        if(!t){
+          fn.apply(this, lastArgs);
+          t = setTimeout(()=>{ t=null; if(lastArgs!==args) fn.apply(this, lastArgs); }, wait);
+        }
+      }
+    }
+
+    function readyForComplete(){
+      const room = state.room;
+      if(!room || room.status!=='in-round' || room.stop) return false;
+      const s = room.settings || {};
+      const requireFull = (s.requireFullAnswers !== false);
+      const requireFirst = (s.requireFirstLetter !== false);
+      const L = room.letter || '';
+      let ok = true;
+      $('#answersGrid').querySelectorAll('input').forEach(inp=>{
+        const v = (inp.value||'').trim();
+        if(requireFull && !v){ ok = false; return; }
+        if(requireFirst && v && !typedStartsWithLetter(v, L)){ ok = false; return; }
+      });
+      return ok;
+    }
+    function updateCompleteButtonState(){
+      const btn = $('#completeBtn');
+      const room = state.room;
+      if(!room || room.status!=='in-round' || room.stop){
+        btn.disabled = true; return;
+      }
+      btn.disabled = !readyForComplete();
+      btn.title = btn.disabled ? 'تحقّق من شروط الإيقاف في إعدادات الهوست' : 'جاهز للإيقاف';
+    }
+
+    async function saveMyAnswers(){
+      const room = state.room;
+      if(!room || room.status!=='in-round' || room.stop) return;
+      const roundKey = 'r'+room.currentRound;
+      const obj = {};
+      $('#answersGrid').querySelectorAll('input').forEach(inp=>{
+        obj[inp.dataset.cat] = inp.value || '';
+      });
+      await db.ref(`rooms/${state.roomCode}/submissions/${roundKey}/${state.userId}`).set(obj);
+    }
+    async function stopRound(){
+      const room = state.room;
+      if(!room || room.status!=='in-round' || room.stop) return;
+      if(!readyForComplete()){
+        alert('لا تُطابق الشروط المحددة في إعدادات الهوست.');
+        return;
+      }
+      await saveMyAnswers();
+      await db.ref('rooms/'+state.roomCode+'/stop').set({
+        by: state.userId,
+        at: firebase.database.ServerValue.TIMESTAMP
+      });
+    }
+
+    // مراجعة: خانة بخانة
+    async function prepareReview(){
+      const room = state.room;
+      if(!state.isHost || !room || room.status!=='in-round' || !room.stop) return;
+      const r = room.currentRound;
+      const roundKey = 'r'+r;
+      const cats = room.categories || DEFAULT_CATEGORIES;
+      const players = room.players || {};
+      const submissions = ((room.submissions||{})[roundKey]) || {};
+      const s = room.settings || {};
+
+      function validForCounting(raw){
+        if(!raw || !raw.trim()) return false;
+        if(s.requireFirstLetter !== false){
+          return typedStartsWithLetter(raw, room.letter);
+        }
+        return true;
+      }
+
+      const countsByCat = {};
+      cats.forEach(cat => countsByCat[cat] = {});
+      for(const uid in players){
+        const ans = submissions[uid] || {};
+        for(const cat of cats){
+          const raw = (ans[cat]||'').toString().trim();
+          if(!validForCounting(raw)) continue;
+          let nm = normalizeArabic(raw);
+          countsByCat[cat][nm] = (countsByCat[cat][nm]||0)+1;
+        }
+      }
+
+      const review = {};
+      for(const uid in players){
+        review[uid] = {};
+        const ans = submissions[uid] || {};
+        for(const cat of cats){
+          const raw = (ans[cat]||'').toString().trim();
+          let mode = null;
+          if(raw){
+            if(!validForCounting(raw)){
+              mode = 'zero';
+            }else{
+              let nm = normalizeArabic(raw);
+              mode = (countsByCat[cat][nm] > 1) ? 'dup' : 'unique';
+            }
+          }
+          review[uid][cat] = { raw, mode };
+        }
+      }
+
+      await db.ref(`rooms/${state.roomCode}/reviews/${roundKey}`).set(review);
+      await db.ref('rooms/'+state.roomCode).update({
+        reviewState: { round:r, catIndex:0 },
+        status: 'review'
+      });
+    }
+
+    function updateReviewView(){
+      const room = state.room;
+      const r = room.currentRound;
+      const roundKey = 'r'+r;
+      const cats = room.categories || DEFAULT_CATEGORIES;
+      const review = (room.reviews||{})[roundKey] || {};
+      const players = room.players || {};
+      const rs = room.reviewState || { round:r, catIndex:0 };
+      const catIndex = Math.min(rs.catIndex||0, cats.length-1);
+      const cat = cats[catIndex] || cats[0];
+
+      $('#revRoundTag').textContent = `${r}/${room.rounds}`;
+      $('#revLetterTag').textContent = room.letter || '—';
+      $('#revCatTag').textContent = cat;
+
+      const container = $('#reviewContainer');
+      container.innerHTML = '';
+
+      const card = document.createElement('div');
+      card.className = 'answer-item';
+      const title = document.createElement('label');
+      title.textContent = `الفئة: ${cat}`;
+      card.appendChild(title);
+
+      const listBox = document.createElement('div');
+      listBox.style.display = 'block';
+
+      Object.keys(players).forEach(uid=>{
+        const p = players[uid];
+        const entry = (review[uid]||{})[cat] || { raw:'', mode:null };
+        const raw = (entry.raw||'').toString();
+        const mode = entry.mode || 'zero';
+
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.style.justifyContent = 'space-between';
+        row.style.margin = '4px 0';
+
+        const left = document.createElement('div');
+        left.innerHTML = `<b>${p.name||'—'}</b> — <span class="pill">${raw || '—'}</span>`;
+
+        const right = document.createElement('div');
+        if(raw.trim()){
+          const mkBtn = (label, kind) => {
+            const btn = document.createElement('button');
+            const selected = (mode === kind);
+            btn.className = 'btn ' + (selected
+              ? (kind==='unique'?'green':kind==='dup'?'warn':'danger')
+              : 'outline');
+            btn.style.padding = '6px 8px';
+            btn.style.fontSize = '12px';
+            btn.textContent = label;
+            btn.disabled = !state.isHost;
+            if(state.isHost){
+              btn.addEventListener('click', ()=> setMode(uid, cat, kind));
+            }
+            return btn;
+          };
+          right.appendChild(mkBtn('احتسب (10)', 'unique'));
+          right.appendChild(mkBtn('مكرر (5)', 'dup'));
+          right.appendChild(mkBtn('صفر (0)', 'zero'));
+        }else{
+          const z = document.createElement('div');
+          z.className = 'pill bad';
+          z.textContent = '0 نقطة';
+          right.appendChild(z);
+        }
+
+        row.appendChild(left);
+        row.appendChild(right);
+        listBox.appendChild(row);
+      });
+
+      card.appendChild(listBox);
+      container.appendChild(card);
+
+      $('#prevCatBtn').classList.toggle('hidden', !(state.isHost && catIndex>0));
+      $('#nextCatBtn').classList.toggle('hidden', !(state.isHost && catIndex<cats.length-1));
+      $('#finalizeReviewBtn').classList.toggle('hidden', !(state.isHost && catIndex===cats.length-1));
+    }
+
+    function changeReviewCat(delta){
+      if(!state.isHost) return;
+      const room = state.room;
+      if(!room || room.status!=='review') return;
+      const cats = room.categories || DEFAULT_CATEGORIES;
+      const idx = Math.min(Math.max((room.reviewState?.catIndex||0) + delta, 0), cats.length-1);
+      db.ref('rooms/'+state.roomCode+'/reviewState/catIndex').set(idx);
+    }
+
+    function setMode(uid, cat, kind){
+      if(!state.isHost) return;
+      const r = state.room.currentRound;
+      const roundKey = 'r'+r;
+      db.ref(`rooms/${state.roomCode}/reviews/${roundKey}/${uid}/${cat}/mode`).set(kind);
+    }
+
+    // احتساب النتائج
+    async function finalizeReview(){
+      if(!state.isHost) return;
+      const ref = db.ref('rooms/'+state.roomCode);
+      const snap = await ref.get();
+      const room = snap.val();
+      if(!room || room.status!=='review') return;
+
+      const r = room.currentRound;
+      const roundKey = 'r'+r;
+      const letter = room.letter || '';
+      const cats = room.categories || DEFAULT_CATEGORIES;
+      const players = room.players || {};
+      const reviews = ((room.reviews||{})[roundKey]) || {};
+
+      const pointsByPlayer = {};
+      for(const uid in players){
+        let pts = 0;
+        for(const cat of cats){
+          const entry = (reviews[uid]||{})[cat] || {};
+          const raw = (entry.raw||'').trim();
+          const mode = entry.mode || 'zero';
+          if(!raw || mode === 'zero'){ /* 0 */ }
+          else if(mode === 'unique'){ pts += 10; }
+          else if(mode === 'dup'){ pts += 5; }
+        }
+        pointsByPlayer[uid] = pts;
+      }
+
+      const updates = {};
+      for(const uid in players){
+        const curr = (players[uid].score||0);
+        updates[`players/${uid}/score`] = curr + (pointsByPlayer[uid]||0);
+      }
+      updates[`roundResults/${r}`] = { letter, pointsByPlayer, stop: room.stop };
+      updates['status'] = 'scoring';
+
+      await ref.update(updates);
+    }
+
+    // النتائج
+    function updateScoringView(){
+      const room = state.room;
+      const r = room.currentRound;
+      const res = room.roundResults && room.roundResults[String(r)];
+      const stopBy = res?.stop?.by || room.stop?.by || null;
+      const stopName = stopBy ? (room.players?.[stopBy]?.name || '—') : '—';
+      $('#scRoundTag').textContent = `${r}/${room.rounds}`;
+      $('#scLetterTag').textContent = room.letter||'—';
+      $('#stoppedByName').textContent = stopName;
+
+      renderScoreboard('#scoreboard', room.players||{});
+
+      const hasMore = r < (room.rounds||0);
+      $('#nextRoundBtn').classList.toggle('hidden', !(state.isHost && hasMore));
+      $('#finishGameBtn').disabled = !state.isHost;
+      $('#backToLobbyBtn2').disabled = !state.isHost;
+      $('#finishGameBtn').title = state.isHost ? '' : 'للهوست فقط';
+      $('#backToLobbyBtn2').title = state.isHost ? '' : 'للهوست فقط';
+    }
+
+    function renderScoreboard(containerSel, playersObj){
+      const box = $(containerSel);
+      const arr = Object.entries(playersObj||{}).map(([id,p])=>({id,...p}));
+      arr.sort((a,b)=> (b.score||0)-(a.score||0));
+      box.innerHTML = '';
+      arr.forEach((p,i)=>{
+        const row = document.createElement('div');
+        row.className = 'score-row';
+        row.innerHTML = `
+          <div class="row" style="align-items:center">
+            <div class="rank ${rankCls(i)}">${i+1}</div>
+            <div style="font-weight:800">${p.name}</div>
+          </div>
+          <div style="font-weight:800">${p.score||0} نقطة</div>
+        `;
+        box.appendChild(row);
+      });
+    }
+
+    async function finishGame(){
+      if(!state.isHost) return;
+      await db.ref('rooms/'+state.roomCode).update({ status:'ended' });
+    }
+    async function nextRound(){
+      if(!state.isHost) return;
+      const room = state.room;
+      const r = room.currentRound;
+      if(r >= (room.rounds||0)){
+        await db.ref('rooms/'+state.roomCode).update({ status:'ended' });
+        return;
+      }
+      await db.ref('rooms/'+state.roomCode).update({
+        status: 'choose-letter',
+        letterVotes: null,
+        letter: null,
+        reviewState: null,
+        stop: null
+      });
+    }
+
+    // نهاية اللعبة
+    function updateEndView(){
+      renderScoreboard('#finalScoreboard', state.room?.players||{});
+      $('#startNewGameBtn').classList.toggle('hidden', !state.isHost);
+      $('#backToLobbyBtn').disabled = !state.isHost;
+      $('#backToLobbyBtn').title = state.isHost ? '' : 'ينتظر الهوست لإرجاع اللوبي';
+    }
+
+    // العودة للوبي + جيم جديد + اسم + خروج + إزالة
+    async function backToLobby(){
+      if(state.isHost){
+        await db.ref('rooms/'+state.roomCode).update({ status:'lobby', stop:null });
+      }else{
+        alert('ينبغي للهوست الضغط على هذا الزر لإرجاع اللوبي.');
+      }
+    }
+    async function startNewGame(){
+      if(!state.isHost || !state.roomCode) return;
+      const ref = db.ref('rooms/'+state.roomCode);
+      const snap = await ref.child('players').get();
+      const players = snap.val() || {};
+      const updates = {
+        status:'lobby',
+        currentRound:0,
+        usedLetters:{},
+        letter:null,
+        letterVotes:null,
+        submissions:null,
+        reviews:null,
+        reviewState:null,
+        roundResults:null,
+        stop:null
+      };
+      for(const uid in players){
+        updates[`players/${uid}/score`] = 0;
+      }
+      await ref.update(updates);
+    }
+    async function renameSelf(){
+      const newName = prompt('اكتب اسمك الجديد:', state.name || '');
+      if(!newName) return;
+      const name = newName.trim();
+      if(!name){ alert('الاسم لا يمكن أن يكون فارغًا.'); return; }
+      if(name.length > 20){ alert('الاسم طويل جدًا (الحد 20 حرف).'); return; }
+      state.name = name;
+      localStorage.setItem('name', name);
+      if(state.roomCode){
+        await db.ref(`rooms/${state.roomCode}/players/${state.userId}/name`).set(name);
+      }
+      setHeader();
+    }
+    async function leaveRoom(){
+      if(!state.roomCode) return;
+      const code = state.roomCode;
+      if(state.isHost){
+        const ok = confirm('أنت الهوست: هل تريد إغلاق الروم للجميع؟');
+        if(!ok) return;
+        await db.ref('rooms/'+code).remove();
+      }else{
+        await db.ref(`rooms/${code}/players/${state.userId}`).remove();
+      }
+      if(state.unsub) state.unsub();
+      state.roomCode = null; state.room = null; state.isHost = false;
+      setHeader(); show('home');
+    }
+    async function removePlayer(uid, name){
+      if(!state.isHost) return;
+      if(uid === (state.room?.hostId)){ alert('لا يمكن إزالة الهوست.'); return; }
+      const ok = confirm(`إزالة ${name||'اللاعب'}؟`);
+      if(!ok) return;
+      const code = state.roomCode;
+      await db.ref(`rooms/${code}/players/${uid}`).remove();
+      await db.ref(`rooms/${code}/kicks/${uid}`).set(firebase.database.ServerValue.TIMESTAMP);
+    }
+  </script>
+</body>
+</html>
